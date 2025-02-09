@@ -1,8 +1,0 @@
-name: mod-flux
-desc: Flux.1文生图插件。  使用方法：/aimg <提示词>
-help: |
-  示例：
-  /aimg 灰色的哈士奇
-version: v1.0
-author: 七七七七
-repo: https://github.com/18005575/flux-1
