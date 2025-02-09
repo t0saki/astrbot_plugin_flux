@@ -35,7 +35,9 @@ class ModFlux(Star):
                 data = {
                     "prompt": prompt,
                     "model": self.model,
-                    "size": "1024x1024"
+                    "size": "1024x1024",
+                    "num_inference_steps": 20,
+                    "prompt_enhancement": True
                 }
                 
                 async with session.post(self.api_url, headers=headers, json=data) as response:
