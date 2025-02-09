@@ -1,0 +1,23 @@
+{
+    "api_url": {
+        "description": "API Base URL",
+        "type": "string",
+        "hint": "API Base URL",
+        "default": "https://api.siliconflow.cn/v1/images/generations",
+        "obvious_hint": false
+    },
+    "api_key": {
+        "description": "API密钥",
+        "type": "string",
+        "hint": "API密钥",
+        "default": "",
+        "obvious_hint": false
+    },
+    "model": {
+        "description": "模型名称",
+        "type": "string",
+        "hint": "模型名称",
+        "default": "",
+        "obvious_hint": false
+    }
+}
