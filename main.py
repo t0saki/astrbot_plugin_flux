@@ -4,19 +4,26 @@ from astrbot.api.star import Context, Star, register
 import aiohttp
 import asyncio
 
-@register("mod-flux", "", "使用Flux.1文生图。使用 /aimg <提示词> 生成图片。", "1.0")
+@register("mod-flux", "", "使用Flux.1文生图。使用 /aimg <提示词> 生成图片。", "1.3")
 class ModFlux(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
         self.api_key = config.get("api_key")
-        self.model = "black-forest-labs/FLUX.1-dev"
+        self.model = config.get("model")
+        self.num_inference_steps = config.get("num_inference_steps")
+        self.size = config.get("size")
         self.api_url = "https://api.siliconflow.cn/v1/images/generations"
 
         if not self.api_key:
             raise ValueError("API密钥必须配置")
 
     @filter.command("aimg")
-    async def generate_image(self, event: AstrMessageEvent, prompt: str = ""):
+    async def generate_image(self, event: AstrMessageEvent):
+
+        full_message = event.message_obj.message_str
+        parts = full_message.split(" ", 1)
+        prompt = parts[1].strip() if len(parts) > 1 else ""
+
         if not self.api_key:
             yield event.plain_result("\n请先在配置文件中设置API密钥")
             return
@@ -35,8 +42,8 @@ class ModFlux(Star):
                 data = {
                     "prompt": prompt,
                     "model": self.model,
-                    "size": "1024x1024",
-                    "num_inference_steps": 20,
+                    "size": self.size,
+                    "num_inference_steps": self.num_inference_steps,
                     "prompt_enhancement": True
                 }
                 
