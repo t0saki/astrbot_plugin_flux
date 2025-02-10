@@ -1,4 +1,4 @@
-# astrbot_plugin_flux
+# Flux.1文生图 AstrBot面板插件
 
 ## 版本更新
 
