@@ -11,7 +11,7 @@
 - 优化提示词显示格式
 
 ## 翻译效果展示
-![翻译效果](https://github.com/18005575/astrbot_plugin_flux/blob/main/translate_demo.png)
+![翻译效果](https://github.com/18005575/astrbot_plugin_flux/blob/main/demo.png)
 
 ### 1.3 版本更新
 - 修复了提示词空格阻断的问题。
