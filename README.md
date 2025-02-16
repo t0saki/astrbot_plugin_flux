@@ -10,6 +10,9 @@
 - 新增中文提示词自动翻译功能
 - 优化提示词显示格式
 
+## 翻译效果展示
+![翻译效果](https://github.com/18005575/astrbot_plugin_flux/blob/main/translate_demo.png)
+
 ### 1.3 版本更新
 - 修复了提示词空格阻断的问题。
 - 新增配置文件项：
