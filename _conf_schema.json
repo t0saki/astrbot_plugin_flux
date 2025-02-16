@@ -39,7 +39,7 @@
     "enable_translation": {
         "description": "启用中文翻译",
         "type": "bool",
-        "default": false,
+        "default": true,
         "hint": "是否自动将中文提示词翻译成英文提示词"
     }
 }
