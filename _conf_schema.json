@@ -37,9 +37,9 @@
         "hint": "用于控制生成结果的随机性，输入'随机'则自动生成随机种子"
     },
     "enable_translation": {
-        "description": "启用中文翻译",
+        "description": "启用中文翻译(已弃用)",
         "type": "bool",
-        "default": true,
-        "hint": "是否自动将中文提示词翻译成英文提示词"
+        "default": false,
+        "hint": "此功能已在v1.5版本中移除，配置选项保留仅为兼容旧版本"
     }
 }
