@@ -16,49 +16,10 @@ class ModFlux(Star):
         self.size = config.get("size")
         self.api_url = config.get("api_url")
         self.seed = config.get("seed")
-        self.enable_translation = config.get("enable_translation")  # 直接从配置文件读取
+        self.enable_translation = config.get("enable_translation")  # 保留此配置项以维持兼容性
 
         if not self.api_key:
             raise ValueError("API密钥必须配置")
-
-    async def translate_to_english(self, text: str) -> str:
-        """将中文提示词翻译成英文"""
-        url = "https://ai.guokei.cn/v1/chat/completions"
-        headers = {
-            "Content-Type": "application/json",
-            "Authorization": "Bearer sk-19aCKGVmHjIZCLMwAbBfC4A3Be464433B98e61F564341e2a"
-        }
-        
-        messages = [
-            {
-                "role": "system",
-                "content": """你是一个专业的文生图提示词翻译助手。请将用户输入的中文提示词翻译成适合文生图使用的英文提示词。
-                - 对艺术创作类描述，使用更优美和专业的表达
-                - 保持图像风格、质量相关的描述词
-                - 直接输出翻译结果，不要添加任何解释
-                - 如果输入已经是英文，则原样返回
-                - 确保翻译结果符合 Stable Diffusion 提示词风格"""
-            },
-            {
-                "role": "user",
-                "content": text
-            }
-        ]
-        
-        data = {
-            "model": "GLM-4-Flash",
-            "messages": messages
-        }
-        
-        try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, headers=headers, json=data) as response:
-                    if response.status == 200:
-                        result = await response.json()
-                        return result['choices'][0]['message']['content'].strip()
-                    return text
-        except Exception as e:
-            return text
 
     @filter.command("aimg")
     async def generate_image(self, event: AstrMessageEvent):
@@ -76,14 +37,17 @@ class ModFlux(Star):
             return
 
         try:
-            # 2. 如果是中文且翻译开启，调用翻译API
-            if self.enable_translation and any('\u4e00' <= char <= '\u9fff' for char in prompt):
-                prompt = await self.translate_to_english(prompt)
+            # 获取种子ID - 修复种子处理逻辑
+            try:
+                if self.seed == "随机" or not self.seed:
+                    current_seed = random.randint(1, 2147483647)
+                else:
+                    current_seed = int(self.seed)
+            except (ValueError, TypeError):
+                # 如果转换失败，使用随机种子
+                current_seed = random.randint(1, 2147483647)
 
-            # 3. 获取种子ID
-            current_seed = random.randint(1, 2147483647) if self.seed == "随机" else int(self.seed)
-
-            # 4. 调用文生图API
+            # 调用文生图API
             async with aiohttp.ClientSession() as session:
                 headers = {
                     'Content-Type': 'application/json',
@@ -102,9 +66,18 @@ class ModFlux(Star):
                 async with session.post(self.api_url, headers=headers, json=data) as response:
                     response_data = await response.json()
                     if response.status != 200:
-                        yield event.plain_result(f"\n生成图片失败: {response_data.get('error', '未知错误')}")
+                        # 修复response_data可能不是字典的问题
+                        error_msg = "未知错误"
+                        if isinstance(response_data, dict) and "error" in response_data:
+                            error_msg = response_data["error"]
+                        yield event.plain_result(f"\n生成图片失败: {error_msg}")
                         return
 
+                    # 确保response_data是字典且包含预期的键
+                    if not isinstance(response_data, dict) or "data" not in response_data or not response_data["data"]:
+                        yield event.plain_result("\n生成图片失败: API返回格式异常")
+                        return
+                        
                     image_url = response_data['data'][0]['url']
                     chain = [
                         Plain(f"提示词：{prompt}\nseed ID：{current_seed}\n生成中~~~~~~"),
