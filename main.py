@@ -6,7 +6,7 @@ import asyncio
 import random
 import json
 
-@register("mod-flux", "", "使用Flux.1文生图。使用 /aimg <提示词> 生成图片。", "1.4")
+@register("mod-flux", "", "使用Flux.1文生图。使用 /aimg <提示词> 生成图片。", "1.5")
 class ModFlux(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
@@ -37,14 +37,14 @@ class ModFlux(Star):
             return
 
         try:
-            # 获取种子ID - 修复种子处理逻辑
+
             try:
                 if self.seed == "随机" or not self.seed:
                     current_seed = random.randint(1, 2147483647)
                 else:
                     current_seed = int(self.seed)
             except (ValueError, TypeError):
-                # 如果转换失败，使用随机种子
+
                 current_seed = random.randint(1, 2147483647)
 
             # 调用文生图API
@@ -64,18 +64,37 @@ class ModFlux(Star):
                 }
                 
                 async with session.post(self.api_url, headers=headers, json=data) as response:
-                    response_data = await response.json()
+
+                    response_text = await response.text()
+                    
+                    # 尝试解析为JSON
+                    try:
+                        response_data = json.loads(response_text)
+                    except json.JSONDecodeError:
+
+                        yield event.plain_result(f"\n生成图片失败: {response_text[:100]}")
+                        return
+
                     if response.status != 200:
-                        # 修复response_data可能不是字典的问题
-                        error_msg = "未知错误"
-                        if isinstance(response_data, dict) and "error" in response_data:
-                            error_msg = response_data["error"]
+
+                        if isinstance(response_data, dict):
+                            if "error" in response_data:
+                                error_detail = response_data["error"]
+                                if isinstance(error_detail, dict) and "message" in error_detail:
+                                    error_msg = error_detail["message"]
+                                else:
+                                    error_msg = str(error_detail)
+                            else:
+                                # 没有error字段，显示整个响应
+                                error_msg = str(response_data)
+                        else:
+                            error_msg = str(response_data)
+                            
                         yield event.plain_result(f"\n生成图片失败: {error_msg}")
                         return
 
-                    # 确保response_data是字典且包含预期的键
                     if not isinstance(response_data, dict) or "data" not in response_data or not response_data["data"]:
-                        yield event.plain_result("\n生成图片失败: API返回格式异常")
+                        yield event.plain_result(f"\n生成图片失败: API返回格式异常 - {str(response_data)[:100]}")
                         return
                         
                     image_url = response_data['data'][0]['url']
