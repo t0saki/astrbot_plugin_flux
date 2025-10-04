@@ -6,7 +6,7 @@ import asyncio
 import random
 import json
 
-@register("mod-flux", "", "使用Flux.1文生图。使用 /aimg <提示词> 生成图片。", "1.5")
+@register("mod-flux", "", "使用Flux.1文生图。使用 /生成图片 <提示词> 生成图片。", "1.5")
 class ModFlux(Star):
     def __init__(self, context: Context, config: dict):
         super().__init__(context)
@@ -21,7 +21,7 @@ class ModFlux(Star):
         if not self.api_key:
             raise ValueError("API密钥必须配置")
 
-    @filter.command("aimg")
+    @filter.command("生成图片")
     async def generate_image(self, event: AstrMessageEvent):
         # 1. 获取用户输入的提示词
         full_message = event.message_obj.message_str
@@ -33,7 +33,7 @@ class ModFlux(Star):
             return
 
         if not prompt:
-            yield event.plain_result("\n请提供提示词！使用方法：/aimg <提示词>")
+            yield event.plain_result("\n请提供提示词！使用方法：/生成图片 <提示词>")
             return
 
         try:

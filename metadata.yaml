@@ -1,6 +1,6 @@
 name: astrbot_plugin_flux
-desc: Flux.1文生图插件-支持OpenAI标准格式统一接入。        使用方法：/aimg <提示词>
-help: 使用方法：/aimg <提示词>
+desc: Flux.1文生图插件-支持OpenAI标准格式统一接入。        使用方法：/生成图片 <提示词>
+help: 使用方法：/生成图片 <提示词>
 version: v1.5
 author: 七七七七
 repo: https://github.com/18005575/astrbot_plugin_flux
